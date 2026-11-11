@@ -105,14 +105,6 @@ Because missed water detections may be more consequential than false alarms in s
 - If edge use is a goal, measure model size, inference latency, and memory use on a named target device. The project’s edge-deployment motivation is not itself evidence of on-device benchmarking.
 - Treat predictions as decision support only; performance on this dataset does not establish reliability on new locations, sensors, weather, or flood events.
 
-## Resume bullets
-
-- Built a TensorFlow/Keras aerial-image classification pipeline using FloodNet imagery and semantic masks; generated image-level standing-water labels using a **0.5% mask-pixel threshold**.
-- Compared a custom four-layer CNN with MobileNetV2 transfer learning, reporting **81% validation accuracy** and **82% standing-water recall**, up from **65%** for the baseline.
-- Developed checkpointing and single-image inference visualizations; reduced training epochs by **66%** in the transfer-learning run.
-
-Use these numbers on your resume only if you can explain the evaluation split and reproduce the results. In particular, describe the 82% recall as **validation** or **test** recall only after confirming which set it came from.
-
 ## Acknowledgments
 
 FloodNet dataset creators and maintainers. Add the dataset’s official citation and license/usage reference here before publishing or redistributing dataset-derived material.
