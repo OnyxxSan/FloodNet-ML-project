@@ -107,4 +107,14 @@ Because missed water detections may be more consequential than false alarms in s
 
 ## Acknowledgments
 
-FloodNet dataset creators and maintainers. Add the dataset’s official citation and license/usage reference here before publishing or redistributing dataset-derived material.
+FloodNet dataset creators and maintainers. Dataset citation:
+
+@ARTICLE{9460988,
+  author={Rahnemoonfar, Maryam and Chowdhury, Tashnim and Sarkar, Argho and Varshney, Debvrat and Yari, Masoud and Murphy, Robin Roberson},
+  journal={IEEE Access},
+  title={FloodNet: A High Resolution Aerial Imagery Dataset for Post Flood Scene Understanding},
+  year={2021},
+  volume={9},
+  pages={89644-89654},
+  doi={10.1109/ACCESS.2021.3090981}
+}
