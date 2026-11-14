@@ -1,9 +1,9 @@
 # FloodNet-ML-project
 # Aerial Drone Standing-Water Classification
 
-A computer-vision project that classifies aerial drone imagery as **standing water** or **dry ground**. Using FloodNet imagery and semantic masks, the pipeline derives image-level labels, compares a custom CNN baseline with MobileNetV2 transfer learning, and explores single-image prediction visualizations.
+A computer-vision project that classifies aerial drone imagery as standing water or dry ground. The workflow uses FloodNet imagery and semantic masks to derive image-level labels, compare a baseline neural network with transfer learning, and evaluate performance on a held-out split.
 
-> **Project scope:** This is an image-classification prototype for experimentation—not a validated flood-warning or emergency-response system. Reported results are from project runs; see [Results](#results-and-evaluation) for evaluation caveats.
+> Project scope: This is an image-classification prototype for experimentation—not a validated flood-warning or emergency-response system. Project-reported results are from notebook runs and should be treated as experimental findings rather than deployment-grade performance claims.
 
 [Open the notebook in Google Colab](https://colab.research.google.com/github/OnyxxSan/FloodNet-ML-project/blob/main/FloodNet_ML_Project.ipynb) · [View the notebook on GitHub](FloodNet_ML_Project.ipynb)
 
@@ -14,26 +14,26 @@ A computer-vision project that classifies aerial drone imagery as **standing wat
 | Custom 4-layer CNN baseline | 76% | 85% | 65% |
 | MobileNetV2 transfer learning | 81% validation accuracy | — | 82% |
 
-MobileNetV2 improved standing-water recall by **17 percentage points** over the baseline and reduced training epochs by **66%**, according to the project runs.
+MobileNetV2 improved standing-water recall by 17 percentage points over the baseline and reduced training epochs by 66%, according to the project runs.
 
-**Metric reporting note:** The values above are project-reported results, not independently reproduced here. The split used for each metric, class-level metric definitions, decision threshold, and held-out test-set results should be documented before treating the comparison as a final benchmark. Do not select or tune a model using the test set.
+> Metric reporting note: The values above are project-reported results, not independently reproduced here. The split used for each metric, class-level metric definitions, decision threshold, and held-out test evaluation should be reported consistently before claiming model performance.
 
 ## Why this project
 
-Missing standing water in aerial imagery can matter for post-flood assessment. This project explores whether image classification can flag scenes containing standing water, with particular attention to recall for the water class. The model predicts a class for an image; it does **not** produce a validated per-pixel water boundary or estimate flood depth.
+Missing standing water in aerial imagery can matter for post-flood assessment. This project explores whether image classification can flag scenes containing standing water, using semantic masks to convert per-pixel labels into an image-level target. The work is intended as a structured experiment and a portfolio-ready data-science project, not a fielded flood-monitoring system.
 
 ## Project workflow
 
-1. **Explore the data** — inspect FloodNet image/mask pairs and dataset organization.
-2. **Create image-level labels** — analyze semantic masks and assign `standing_water` when the water-pixel fraction exceeds a configurable threshold (reported as **0.5%**); otherwise assign `dry_ground`.
-3. **Train a baseline** — build and evaluate a custom four-layer CNN.
-4. **Apply transfer learning** — fine-tune or adapt MobileNetV2 and compare performance with the baseline.
-5. **Save artifacts** — configure model checkpoints and outputs to persist in Google Drive.
-6. **Run inference** — load saved weights and visualize a single-image prediction with its confidence score and overlay.
+1. Explore the data — inspect FloodNet image/mask pairs and dataset organization.
+2. Create image-level labels — analyze semantic masks and assign `standing_water` when the water-pixel fraction exceeds a configurable threshold (reported as 0.5%); otherwise assign `dry_ground`.
+3. Train a baseline — build and evaluate a custom four-layer CNN.
+4. Apply transfer learning — fine-tune or adapt MobileNetV2 and compare performance with the baseline.
+5. Save artifacts — configure model checkpoints and outputs to persist in Google Drive.
+6. Run inference — load saved weights and visualize a single-image prediction with its confidence score and overlay.
 
 ## Dataset
 
-The notebook uses the **FloodNet Supervised v1.0** dataset, with paired original images and semantic-label images. The notebook output shows the following split sizes:
+The notebook uses the FloodNet Supervised v1.0 dataset, with paired original images and semantic-label images. The notebook output shows the following split sizes:
 
 | Split | Image/mask pairs |
 |---|---:|
@@ -41,7 +41,7 @@ The notebook uses the **FloodNet Supervised v1.0** dataset, with paired original
 | Validation | 450 |
 | Test | 448 |
 
-The dataset itself is not included in this repository. Obtain it from its official source and review its terms of use before downloading or redistributing it. Keep the provided train/validation/test partitions intact. The mask-derived 0.5% threshold is a project labeling rule; it should be validated and described alongside the mask colors/classes used to identify water.
+The dataset is not included in this repository. Obtain it from its official source and review its terms of use before downloading or redistributing it.
 
 Expected source layout:
 
@@ -59,6 +59,18 @@ dataset/
         └── test-label-img/
 ```
 
+## Reproducible setup
+
+This repository now includes a minimal reproducible environment for local work:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+The environment includes the core packages for TensorFlow, NumPy, pandas, scikit-learn, matplotlib, seaborn, Pillow, and Jupyter-compatible tooling.
+
 ## Run the notebook
 
 ### Google Colab
@@ -71,29 +83,56 @@ dataset/
 
 ### Local environment
 
-The notebook currently uses Google Colab-specific Drive integration. To run it locally, install the notebook’s dependencies, remove or replace the `google.colab` Drive-mount cell, and configure local dataset and output paths. The repository does not yet provide a pinned environment file, so package versions may need to be matched to the versions used for the original runs.
+The notebook currently uses Google Colab-specific Drive integration. To run it locally, install the project dependencies, remove or replace the `google.colab` Drive-mount cell, and configure local paths.
 
 ## Methods and evaluation
 
-The classification labels are derived from semantic masks using a water-pixel proportion threshold. This converts a pixel-level annotation into an image-level target; images near the threshold may be sensitive to small changes in the rule.
+The classification labels are derived from semantic masks using a water-pixel proportion threshold. This converts a pixel-level annotation into an image-level target; images near the threshold may be ambiguous, so the threshold should be documented and monitored.
 
-For a more complete evaluation, report metrics on the held-out test split, including:
+The repository includes reusable helper functions for label generation and evaluation metrics so the project is easier to interpret and reproduce:
+
+```python
+from src.labeling import compute_water_fraction, build_image_label
+from src.evaluate import summarize_classification
+```
+
+A recruiter-ready evaluation should report all of the following on the final held-out test split:
 
 - Per-class precision, recall, and F1-score
 - Confusion matrix and class support
 - Precision–recall curve or average precision for the standing-water class
 - The classification threshold and how it was selected
 - Model input size, preprocessing, random seed, and training configuration
+- Clear reporting of validation and test performance separately
 
-Because missed water detections may be more consequential than false alarms in some settings, accuracy alone is not sufficient. Compare models using the standing-water class’s recall and precision, and explain the trade-off.
+Because missed water detections may be more consequential than false alarms in some settings, accuracy alone is not sufficient. Compare models using the standing-water class recall and precision, not only overall accuracy.
 
 ## Repository contents
 
 ```text
 .
 ├── FloodNet_ML_Project.ipynb   # Data exploration, training, and inference workflow
-└── README.md
+├── README.md                   # Project overview and setup instructions
+├── requirements.txt            # Reproducible Python environment
+├── src/
+│   ├── __init__.py
+│   ├── labeling.py             # Water-fraction and image-label utilities
+│   └── evaluate.py             # Classification metric helpers
+├── tests/
+│   └── test_labeling.py        # Basic checks for label-generation logic
+└── reports/                    # Optional output directory for metrics and figures
 ```
+
+## Data quality and portfolio improvements
+
+The project now includes a clearer structure for reproducibility and evaluation. In a recruiter-ready version, the key next steps are:
+
+- Publish a reproducible environment file with the tested Python, TensorFlow, and supporting-library versions.
+- Record class counts after mask-to-image labeling and verify image/mask ID matching and split integrity.
+- Add a final held-out test evaluation, per-class metrics, confusion matrix, and precision–recall curve.
+- Save the threshold, preprocessing settings, random seed, model configuration, and evaluation results with each run.
+- Add representative prediction examples, including false positives and false negatives.
+- Treat predictions as decision support only; performance on this dataset does not establish reliability on new locations, sensors, weather, or flood events.
 
 ## Limitations and next steps
 
@@ -118,3 +157,6 @@ FloodNet dataset creators and maintainers. Dataset citation:
   pages={89644-89654},
   doi={10.1109/ACCESS.2021.3090981}
 }
+
+
+
